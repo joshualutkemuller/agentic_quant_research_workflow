@@ -1,0 +1,7 @@
+pipelines:
+  daily:
+    cron: "0 7 * * 1-5"
+  weekly:
+    cron: "0 8 * * 5"
+  monthly:
+    cron: "0 9 1 * *"

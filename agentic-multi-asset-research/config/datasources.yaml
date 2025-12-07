@@ -1,0 +1,28 @@
+benchmarks:
+  equity:
+    universe:
+      - SPX
+      - MSCI_WORLD
+      - MSCI_EM
+    frequency: daily
+    max_lag_days: 2
+  rates:
+    universe:
+      - US_TREASURY_10Y
+      - US_TREASURY_2Y
+    frequency: daily
+    max_lag_days: 2
+  credit:
+    universe:
+      - HY_OAS
+      - IG_OAS
+    frequency: daily
+    max_lag_days: 3
+connections:
+  snowflake:
+    account: ${SNOWFLAKE_ACCOUNT}
+    user: ${SNOWFLAKE_USER}
+    warehouse: ${SNOWFLAKE_WAREHOUSE}
+    role: ${SNOWFLAKE_ROLE}
+    database: MARKET_DATA
+    schema: BENCHMARK_RETURNS

@@ -1,0 +1,19 @@
+dashboards:
+  daily_overview:
+    outputs:
+      - name: cross_asset_heatmap
+        file: dashboards/data/daily_cross_asset_heatmap.json
+        description: "Daily performance and volatility snapshot across asset classes."
+      - name: risk_factors_summary
+        file: dashboards/data/daily_risk_factors_summary.json
+        description: "Key risk factor moves and z-scores."
+  weekly_review:
+    outputs:
+      - name: factor_timing_grid
+        file: dashboards/data/weekly_factor_timing_grid.json
+      - name: drawdown_summary
+        file: dashboards/data/weekly_drawdown_summary.json
+  monthly_saa:
+    outputs:
+      - name: saa_proposals
+        file: dashboards/data/monthly_saa_proposals.json

@@ -1,0 +1,21 @@
+factor_timing:
+  enabled: true
+  horizons:
+    - 21
+    - 63
+    - 252
+  model_type: "hist_gradient_boosting"
+  min_obs: 500
+
+saa_optimizer:
+  enabled: true
+  base_saa_id: "GLOBAL_MULTI_ASSET"
+  risk_aversion:
+    base: 3.0
+    low: 2.0
+    high: 4.0
+
+risk_metrics:
+  vol_lookback_days: 252
+  corr_lookback_days: 252
+  min_data_coverage: 0.9
