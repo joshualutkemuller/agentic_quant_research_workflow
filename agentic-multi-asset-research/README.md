@@ -23,6 +23,19 @@ The system is organized into five logical agents:
 
 The workflow is driven by configuration files in `config/` and orchestrated through Python pipelines in `src/pipelines/`, triggered on schedules defined in GitHub Actions.
 
+### End-to-end workflow summary
+
+- **Data/benchmarks** – standardize and validate benchmark, factor, and pricing data using `config/datasources.yaml` with quality and recency checks.
+- **Research/analytics** – run factor-timing, risk, and asset-allocation models configured in `config/models.yaml`, producing structured portfolio diagnostics.
+- **Narrative/insights** – convert analytics into Markdown reports placed in `reports/` and pre-shaped data feeds stored in `dashboards/data/` for downstream dashboards.
+- **Consumer app blueprint** – generate a retail investing playbook via the `consumer` pipeline, combining portfolio analytics with iOS/web/backend delivery plans and action items.
+- **Snowflake analytics blueprint** – ingest a Snowflake schema via the `snowflake` pipeline to emit table metadata, ready-to-run SQL queries, and dashboard starters for benchmark/constituent analysis.
+- **Orchestration & GitHub** – pipelines in `src/pipelines/` are invoked through `src.orchestration.runner` (manually or via CI), while the GitHub steward agent opens issues/PRs when new artifacts are produced.
+
+### Consumer quant blueprint (new)
+
+In addition to the institutional research stack, the repository now ships a consumer-focused agentic framework that assembles a turnkey blueprint for retail investing apps. It ingests a sample household portfolio from `config/consumer/blueprint.yaml`, runs allocation, concentration, stress, and cashflow-aware growth analytics, and produces a Markdown blueprint describing the data connectors, analytics modules, and actionable playbooks needed for an “invest like a quant” consumer experience.
+
 ## Key Components
 
 - `config/datasources.yaml` – definitions of data sources, benchmark universes, and recency thresholds  
@@ -47,6 +60,18 @@ Run a pipeline manually, for example the daily snapshot:
 
 ```bash
 python -m src.orchestration.runner --pipeline daily
+```
+
+Generate the consumer quant blueprint and retail-app action plan:
+
+```bash
+python -m src.orchestration.runner --pipeline consumer
+```
+
+Produce a Snowflake benchmark analytics blueprint (schema + queries + dashboard starters):
+
+```bash
+python -m src.orchestration.runner --pipeline snowflake
 ```
 
 ## GitHub Integration

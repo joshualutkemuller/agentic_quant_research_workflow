@@ -1,0 +1,144 @@
+user_profile:
+  risk_tolerance: moderate
+  investment_horizon_years: 10
+  objective: "Build a diversified portfolio with disciplined risk controls while keeping fees low."
+
+portfolio:
+  holdings:
+    - symbol: AAPL
+      quantity: 50
+      price: 190
+      asset_class: equities
+      theme: us_mega_cap
+      beta: 1.1
+    - symbol: VTI
+      quantity: 40
+      price: 210
+      asset_class: equities
+      theme: broad_market
+      beta: 1.0
+    - symbol: AGG
+      quantity: 80
+      price: 100
+      asset_class: bonds
+      theme: core_bond
+      duration: 5.5
+    - symbol: GLD
+      quantity: 10
+      price: 180
+      asset_class: real_assets
+      theme: gold
+    - symbol: CASH
+      quantity: 1
+      price: 5000
+      asset_class: cash
+      theme: cash
+
+policy_targets:
+  equities: 0.65
+  bonds: 0.25
+  real_assets: 0.05
+  cash: 0.05
+
+expected_returns:
+  equities: 0.06
+  bonds: 0.025
+  real_assets: 0.03
+  cash: 0.015
+
+stress_tests:
+  equity_shock:
+    description: "Equities down 15%, bonds up 2%, gold up 5%"
+    shocks:
+      equities: -0.15
+      bonds: 0.02
+      real_assets: 0.05
+      cash: 0.0
+  rate_spike:
+    description: "Rates +150 bps, bonds fall, equities wobble"
+    shocks:
+      equities: -0.03
+      bonds: -0.08
+      real_assets: 0.02
+      cash: 0.0
+  inflation_surprise:
+    description: "Inflation surprise boosts commodities and hurts bonds"
+    shocks:
+      equities: -0.04
+      bonds: -0.06
+      real_assets: 0.08
+      cash: 0.0
+
+action_templates:
+  rebalance_threshold: 0.02
+  max_single_position: 0.25
+  monthly_contribution: 750
+  notes:
+    - "Prioritize tax-advantaged accounts for bond exposure."
+    - "Favor low-cost ETFs unless single-name conviction is high."
+
+application_targets:
+  ios:
+    app_name: "Everyday Quant"
+    primary_flows:
+      - "Onboarding with brokerage link and optional CSV upload"
+      - "Portfolio overview: weights, trends, and projected value"
+      - "Action center: rebalance suggestions and goal tracking"
+    widgets:
+      - "Home Screen portfolio tile with daily P&L"
+      - "Lock screen push for stress alerts and rebalance nudges"
+    ci_cd:
+      - "Fastlane lanes for build/test/distribute"
+      - "TestFlight beta with crash + performance telemetry"
+      - "App Store release notes sourced from GitHub releases"
+  backend:
+    hosting: "FastAPI service on Azure App Service with managed PostgreSQL"
+    services:
+      - name: "portfolio-api"
+        description: "CRUD for portfolios, holdings, and user targets"
+        stack: "FastAPI + SQLAlchemy + pydantic"
+      - name: "analytics-worker"
+        description: "Async jobs for projections, stress tests, and report generation"
+        stack: "Azure Container Apps + Redis queue"
+    api_contracts:
+      - method: "GET"
+        path: "/api/v1/portfolio"
+        purpose: "Return latest holdings, allocation weights, and diagnostics"
+        response: "{ holdings: [...], weights: {..}, herfindahl_index: float }"
+      - method: "POST"
+        path: "/api/v1/actions/accept"
+        purpose: "User accepts or defers a suggested action"
+        response: "{ status: 'queued', action_id: str }"
+      - method: "POST"
+        path: "/api/v1/imports/broker"
+        purpose: "Ingest brokerage export or Plaid payload"
+        response: "{ status: 'received', job_id: str }"
+    data_schema:
+      portfolio_snapshots:
+        - "snapshot_id (uuid)"
+        - "user_id (uuid)"
+        - "as_of (date)"
+        - "total_value (numeric)"
+        - "weights (jsonb)"
+      holdings:
+        - "holding_id (uuid)"
+        - "snapshot_id (uuid)"
+        - "symbol (text)"
+        - "asset_class (text)"
+        - "quantity (numeric)"
+        - "price (numeric)"
+        - "value (numeric)"
+      actions:
+        - "action_id (uuid)"
+        - "user_id (uuid)"
+        - "type (text)"
+        - "payload (jsonb)"
+        - "status (text)"
+        - "created_at (timestamptz)"
+  web:
+    url: "https://app.everydayquant.com"
+    auth: "OAuth + device login with email/SMS MFA"
+    pages:
+      - "Landing: value prop, screenshots, and waitlist"
+      - "Dashboard: mirror of iOS overview with responsive charts"
+      - "Report viewer: latest quant blueprint and PDF/CSV exports"
