@@ -76,3 +76,69 @@ action_templates:
   notes:
     - "Prioritize tax-advantaged accounts for bond exposure."
     - "Favor low-cost ETFs unless single-name conviction is high."
+
+application_targets:
+  ios:
+    app_name: "Everyday Quant"
+    primary_flows:
+      - "Onboarding with brokerage link and optional CSV upload"
+      - "Portfolio overview: weights, trends, and projected value"
+      - "Action center: rebalance suggestions and goal tracking"
+    widgets:
+      - "Home Screen portfolio tile with daily P&L"
+      - "Lock screen push for stress alerts and rebalance nudges"
+    ci_cd:
+      - "Fastlane lanes for build/test/distribute"
+      - "TestFlight beta with crash + performance telemetry"
+      - "App Store release notes sourced from GitHub releases"
+  backend:
+    hosting: "FastAPI service on Azure App Service with managed PostgreSQL"
+    services:
+      - name: "portfolio-api"
+        description: "CRUD for portfolios, holdings, and user targets"
+        stack: "FastAPI + SQLAlchemy + pydantic"
+      - name: "analytics-worker"
+        description: "Async jobs for projections, stress tests, and report generation"
+        stack: "Azure Container Apps + Redis queue"
+    api_contracts:
+      - method: "GET"
+        path: "/api/v1/portfolio"
+        purpose: "Return latest holdings, allocation weights, and diagnostics"
+        response: "{ holdings: [...], weights: {..}, herfindahl_index: float }"
+      - method: "POST"
+        path: "/api/v1/actions/accept"
+        purpose: "User accepts or defers a suggested action"
+        response: "{ status: 'queued', action_id: str }"
+      - method: "POST"
+        path: "/api/v1/imports/broker"
+        purpose: "Ingest brokerage export or Plaid payload"
+        response: "{ status: 'received', job_id: str }"
+    data_schema:
+      portfolio_snapshots:
+        - "snapshot_id (uuid)"
+        - "user_id (uuid)"
+        - "as_of (date)"
+        - "total_value (numeric)"
+        - "weights (jsonb)"
+      holdings:
+        - "holding_id (uuid)"
+        - "snapshot_id (uuid)"
+        - "symbol (text)"
+        - "asset_class (text)"
+        - "quantity (numeric)"
+        - "price (numeric)"
+        - "value (numeric)"
+      actions:
+        - "action_id (uuid)"
+        - "user_id (uuid)"
+        - "type (text)"
+        - "payload (jsonb)"
+        - "status (text)"
+        - "created_at (timestamptz)"
+  web:
+    url: "https://app.everydayquant.com"
+    auth: "OAuth + device login with email/SMS MFA"
+    pages:
+      - "Landing: value prop, screenshots, and waitlist"
+      - "Dashboard: mirror of iOS overview with responsive charts"
+      - "Report viewer: latest quant blueprint and PDF/CSV exports"

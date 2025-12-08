@@ -143,8 +143,38 @@ class ConsumerApplicationAgent:
   def __init__(self, blueprint: Dict[str, Any]):
     self.blueprint = blueprint
 
+  def derive_app_delivery_plan(self) -> Dict[str, Any]:
+    targets = self.blueprint.get("application_targets", {})
+
+    ios_plan = {
+      "app_name": targets.get("ios", {}).get("app_name", ""),
+      "primary_flows": targets.get("ios", {}).get("primary_flows", []),
+      "widgets": targets.get("ios", {}).get("widgets", []),
+      "ci_cd": targets.get("ios", {}).get("ci_cd", []),
+    }
+
+    backend_plan = {
+      "services": targets.get("backend", {}).get("services", []),
+      "api_contracts": targets.get("backend", {}).get("api_contracts", []),
+      "data_schema": targets.get("backend", {}).get("data_schema", {}),
+      "hosting": targets.get("backend", {}).get("hosting", ""),
+    }
+
+    web_plan = {
+      "url": targets.get("web", {}).get("url", ""),
+      "pages": targets.get("web", {}).get("pages", []),
+      "auth": targets.get("web", {}).get("auth", ""),
+    }
+
+    return {
+      "ios": ios_plan,
+      "backend": backend_plan,
+      "web": web_plan,
+    }
+
   def assemble_blueprint(self, as_of: date, data_state: Dict[str, Any], analytics: Dict[str, Any], projection: List[Dict[str, Any]], stress_tests: List[Dict[str, Any]], actions: List[str]) -> Dict[str, Any]:
     profile = data_state.get("profile", {})
+    delivery_plan = self.derive_app_delivery_plan()
 
     return {
       "as_of": str(as_of),
@@ -168,6 +198,7 @@ class ConsumerApplicationAgent:
         "Goal tracking with monthly contribution planning",
         "Action queue connected to brokerage/trading APIs",
       ],
+      "app_delivery": delivery_plan,
     }
 
   def to_markdown(self, app_blueprint: Dict[str, Any]) -> str:
@@ -218,6 +249,73 @@ class ConsumerApplicationAgent:
     lines.append("## Application Modules")
     for module in app_blueprint.get("modules", []):
       lines.append(f"- {module}")
+
+    delivery = app_blueprint.get("app_delivery", {})
+    if any(delivery.values()):
+      lines.append("")
+      lines.append("## App Delivery Plan")
+
+      ios_plan = delivery.get("ios", {})
+      if ios_plan:
+        lines.append("### iOS Experience")
+        if ios_plan.get("app_name"):
+          lines.append(f"- App name: {ios_plan['app_name']}")
+        if ios_plan.get("primary_flows"):
+          lines.append("- Primary flows:")
+          for flow in ios_plan["primary_flows"]:
+            lines.append(f"  - {flow}")
+        if ios_plan.get("widgets"):
+          lines.append("- Widgets/notifications:")
+          for widget in ios_plan["widgets"]:
+            lines.append(f"  - {widget}")
+        if ios_plan.get("ci_cd"):
+          lines.append("- Delivery pipeline:")
+          for step in ios_plan["ci_cd"]:
+            lines.append(f"  - {step}")
+
+      backend_plan = delivery.get("backend", {})
+      if backend_plan:
+        lines.append("")
+        lines.append("### Backend & Data")
+        if backend_plan.get("hosting"):
+          lines.append(f"- Hosting: {backend_plan['hosting']}")
+        if backend_plan.get("services"):
+          lines.append("- Services:")
+          for service in backend_plan["services"]:
+            name = service.get("name")
+            description = service.get("description", "")
+            stack = service.get("stack", "")
+            line = f"  - {name}: {description}" if description else f"  - {name}"
+            if stack:
+              line += f" | Stack: {stack}"
+            lines.append(line)
+        if backend_plan.get("api_contracts"):
+          lines.append("- API contracts:")
+          for api in backend_plan["api_contracts"]:
+            method = api.get("method", "GET")
+            path = api.get("path", "")
+            purpose = api.get("purpose", "")
+            response = api.get("response", "")
+            lines.append(f"  - {method} {path} – {purpose} | Response: {response}")
+        if backend_plan.get("data_schema"):
+          lines.append("- Data schema:")
+          for table, fields in backend_plan["data_schema"].items():
+            lines.append(f"  - {table}:")
+            for field in fields:
+              lines.append(f"    - {field}")
+
+      web_plan = delivery.get("web", {})
+      if web_plan:
+        lines.append("")
+        lines.append("### Web Experience")
+        if web_plan.get("url"):
+          lines.append(f"- URL: {web_plan['url']}")
+        if web_plan.get("auth"):
+          lines.append(f"- Auth: {web_plan['auth']}")
+        if web_plan.get("pages"):
+          lines.append("- Pages:")
+          for page in web_plan["pages"]:
+            lines.append(f"  - {page}")
 
     return "\n".join(lines)
 

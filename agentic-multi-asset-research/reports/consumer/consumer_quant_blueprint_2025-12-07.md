@@ -56,3 +56,58 @@
 - Scenario builder for retail-friendly what-if analysis
 - Goal tracking with monthly contribution planning
 - Action queue connected to brokerage/trading APIs
+
+## App Delivery Plan
+### iOS Experience
+- App name: Everyday Quant
+- Primary flows:
+  - Onboarding with brokerage link and optional CSV upload
+  - Portfolio overview: weights, trends, and projected value
+  - Action center: rebalance suggestions and goal tracking
+- Widgets/notifications:
+  - Home Screen portfolio tile with daily P&L
+  - Lock screen push for stress alerts and rebalance nudges
+- Delivery pipeline:
+  - Fastlane lanes for build/test/distribute
+  - TestFlight beta with crash + performance telemetry
+  - App Store release notes sourced from GitHub releases
+
+### Backend & Data
+- Hosting: FastAPI service on Azure App Service with managed PostgreSQL
+- Services:
+  - portfolio-api: CRUD for portfolios, holdings, and user targets | Stack: FastAPI + SQLAlchemy + pydantic
+  - analytics-worker: Async jobs for projections, stress tests, and report generation | Stack: Azure Container Apps + Redis queue
+- API contracts:
+  - GET /api/v1/portfolio – Return latest holdings, allocation weights, and diagnostics | Response: { holdings: [...], weights: {..}, herfindahl_index: float }
+  - POST /api/v1/actions/accept – User accepts or defers a suggested action | Response: { status: 'queued', action_id: str }
+  - POST /api/v1/imports/broker – Ingest brokerage export or Plaid payload | Response: { status: 'received', job_id: str }
+- Data schema:
+  - portfolio_snapshots:
+    - snapshot_id (uuid)
+    - user_id (uuid)
+    - as_of (date)
+    - total_value (numeric)
+    - weights (jsonb)
+  - holdings:
+    - holding_id (uuid)
+    - snapshot_id (uuid)
+    - symbol (text)
+    - asset_class (text)
+    - quantity (numeric)
+    - price (numeric)
+    - value (numeric)
+  - actions:
+    - action_id (uuid)
+    - user_id (uuid)
+    - type (text)
+    - payload (jsonb)
+    - status (text)
+    - created_at (timestamptz)
+
+### Web Experience
+- URL: https://app.everydayquant.com
+- Auth: OAuth + device login with email/SMS MFA
+- Pages:
+  - Landing: value prop, screenshots, and waitlist
+  - Dashboard: mirror of iOS overview with responsive charts
+  - Report viewer: latest quant blueprint and PDF/CSV exports
