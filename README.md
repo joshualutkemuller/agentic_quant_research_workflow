@@ -23,6 +23,13 @@ The system is organized into five logical agents:
 
 The workflow is driven by configuration files in `config/` and orchestrated through Python pipelines in `src/pipelines/`, triggered on schedules defined in GitHub Actions.
 
+### Mobile + Web delivery
+
+- The consumer pipeline emits a blueprint (in `reports/consumer/`) that includes iOS flows, backend API contracts, and a web dashboard checklist.
+- Use the blueprint to guide an iOS client (e.g., SwiftUI) that consumes the `portfolio-api` endpoints and surfaces stress tests, projections, and action items.
+- The backend reference stack is FastAPI + PostgreSQL, deployable to Azure App Service with async workers for long-running analytics jobs.
+- The web experience can mirror the mobile dashboard with OAuth-backed authentication and export/download capabilities.
+
 ## Key Components
 
 - `config/datasources.yaml` – definitions of data sources, benchmark universes, and recency thresholds  

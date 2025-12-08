@@ -23,6 +23,10 @@ The system is organized into five logical agents:
 
 The workflow is driven by configuration files in `config/` and orchestrated through Python pipelines in `src/pipelines/`, triggered on schedules defined in GitHub Actions.
 
+### Consumer quant blueprint (new)
+
+In addition to the institutional research stack, the repository now ships a consumer-focused agentic framework that assembles a turnkey blueprint for retail investing apps. It ingests a sample household portfolio from `config/consumer/blueprint.yaml`, runs allocation, concentration, stress, and cashflow-aware growth analytics, and produces a Markdown blueprint describing the data connectors, analytics modules, and actionable playbooks needed for an “invest like a quant” consumer experience.
+
 ## Key Components
 
 - `config/datasources.yaml` – definitions of data sources, benchmark universes, and recency thresholds  
@@ -47,6 +51,12 @@ Run a pipeline manually, for example the daily snapshot:
 
 ```bash
 python -m src.orchestration.runner --pipeline daily
+```
+
+Generate the consumer quant blueprint and retail-app action plan:
+
+```bash
+python -m src.orchestration.runner --pipeline consumer
 ```
 
 ## GitHub Integration
