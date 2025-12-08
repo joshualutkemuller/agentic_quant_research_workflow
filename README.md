@@ -23,6 +23,22 @@ The system is organized into five logical agents:
 
 The workflow is driven by configuration files in `config/` and orchestrated through Python pipelines in `src/pipelines/`, triggered on schedules defined in GitHub Actions.
 
+### End-to-end workflow summary
+
+- **Data/benchmarks** – standardize and validate benchmark, factor, and pricing data using `config/datasources.yaml` with quality and recency checks.
+- **Research/analytics** – run factor-timing, risk, and asset-allocation models configured in `config/models.yaml`, producing structured portfolio diagnostics.
+- **Narrative/insights** – convert analytics into Markdown reports placed in `reports/` and pre-shaped data feeds stored in `dashboards/data/` for downstream dashboards.
+- **Consumer app blueprint** – generate a retail investing playbook via the `consumer` pipeline, combining portfolio analytics with iOS/web/backend delivery plans and action items.
+- **Snowflake analytics blueprint** – ingest a Snowflake schema via the `snowflake` pipeline to emit table metadata, ready-to-run SQL queries, and dashboard starters for benchmark/constituent analysis.
+- **Orchestration & GitHub** – pipelines in `src/pipelines/` are invoked through `src.orchestration.runner` (manually or via CI), while the GitHub steward agent opens issues/PRs when new artifacts are produced.
+
+### Mobile + Web delivery
+
+- The consumer pipeline emits a blueprint (in `reports/consumer/`) that includes iOS flows, backend API contracts, and a web dashboard checklist.
+- Use the blueprint to guide an iOS client (e.g., SwiftUI) that consumes the `portfolio-api` endpoints and surfaces stress tests, projections, and action items.
+- The backend reference stack is FastAPI + PostgreSQL, deployable to Azure App Service with async workers for long-running analytics jobs.
+- The web experience can mirror the mobile dashboard with OAuth-backed authentication and export/download capabilities.
+
 ## Key Components
 
 - `config/datasources.yaml` – definitions of data sources, benchmark universes, and recency thresholds  

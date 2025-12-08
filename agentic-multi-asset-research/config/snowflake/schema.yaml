@@ -1,0 +1,100 @@
+connection:
+  warehouse: ANALYTICS_WH
+  role: BENCHMARK_ANALYST
+  database: CAPITAL_MARKETS
+  schema: BENCHMARKS
+
+tables:
+  benchmark_master:
+    name: BENCHMARK_MASTER
+    description: Universe of benchmarks and ETFs with currency and region tags.
+    grain: one row per benchmark_id
+    primary_keys:
+      - benchmark_id
+    columns:
+      - benchmark_id (string)
+      - benchmark_name (string)
+      - currency (string)
+      - region (string)
+      - provider (string)
+      - inception_date (date)
+
+  benchmark_returns:
+    name: BENCHMARK_RETURNS
+    description: Daily performance in local currency with FX alignment columns.
+    grain: one row per benchmark_id per trade_date
+    primary_keys:
+      - benchmark_id
+      - trade_date
+    columns:
+      - trade_date (date)
+      - benchmark_id (string)
+      - total_return_local (float)
+      - fx_rate_to_usd (float)
+      - vendor_batch_id (string)
+
+  benchmark_returns_fx:
+    name: BENCHMARK_RETURNS_FX
+    description: Daily returns normalized to USD for downstream analytics.
+    grain: one row per benchmark_id per trade_date
+    primary_keys:
+      - benchmark_id
+      - trade_date
+    columns:
+      - trade_date (date)
+      - benchmark_id (string)
+      - total_return_usd (float)
+      - fx_rate_to_usd (float)
+      - load_timestamp (timestamp)
+
+  benchmark_constituents:
+    name: BENCHMARK_CONSTITUENTS
+    description: Benchmark member list with weights and classification tags.
+    grain: one row per benchmark_id per ticker per as_of_date
+    primary_keys:
+      - benchmark_id
+      - ticker
+      - as_of_date
+    columns:
+      - as_of_date (date)
+      - next_rebalance_date (date)
+      - benchmark_id (string)
+      - ticker (string)
+      - weight (float)
+      - sector (string)
+      - country (string)
+      - currency (string)
+
+  constituent_fundamentals:
+    name: CONSTITUENT_FUNDAMENTALS
+    description: Point-in-time valuation and quality metrics for constituents.
+    grain: one row per ticker per period_end_date
+    primary_keys:
+      - ticker
+      - period_end_date
+    columns:
+      - ticker (string)
+      - period_end_date (date)
+      - pe_ratio (float)
+      - pb_ratio (float)
+      - dividend_yield (float)
+      - revenue_growth (float)
+      - sector (string)
+      - country (string)
+      - source (string)
+
+  prices_snapshots:
+    name: PRICES_SNAPSHOTS
+    description: Daily closes and volumes for any tradable constituents.
+    grain: one row per ticker per trade_date
+    primary_keys:
+      - ticker
+      - trade_date
+    columns:
+      - trade_date (date)
+      - ticker (string)
+      - close_price (float)
+      - volume (float)
+      - adjusted_close (float)
+      - fx_rate_to_usd (float)
+      - vendor_batch_id (string)
